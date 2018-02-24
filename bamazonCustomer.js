@@ -18,13 +18,14 @@ connection.connect(function(err) {
   }
 );
 
-function getOrder() {
+function getOrder(availableIds) {
+
   inquirer.prompt([
     {
       name: "itemId",
       message: "id of item?",
       validate: function(value) {
-        if (isNaN(value) === false) {
+        if (isNaN(value) === false && value.indexOf(".") === -1 && availableIds.indexOf(parseInt(value)) > -1 ) {
           return true;
         }
         return false;
@@ -44,25 +45,30 @@ function getOrder() {
     var itemId = answers.itemId
     var itemQty = answers.itemQty
 
-    var query = `SELECT stock_quantity, price, product_name FROM products where item_id = ${itemId}`;
+    processTransaction(itemId, itemQty)
+  })
+}
 
-    connection.query(query, function(err, res) {
 
-      var stockQty = res[0].stock_quantity
-      var price = res[0].price
-      var product_name = res[0].product_name
+function processTransaction(itemId, itemQty){
+  var query = `SELECT stock_quantity, price, product_name FROM products where item_id = ${itemId}`;
 
-      if (stockQty >= itemQty) {
-        var query2 = `UPDATE products set stock_quantity = ${stockQty - itemQty} where item_id = ${itemId}`;
-        connection.query(query2, function(err, res) {
-          console.log(`order successful, your total is $${itemQty*price}`)
-          displayAll()
-        })
-      } else {
-        console.log("order failed, insufficient quantity")
+  connection.query(query, function(err, res) {
+
+    var stockQty = res[0].stock_quantity
+    var price = res[0].price
+    var product_name = res[0].product_name
+
+    if (stockQty >= itemQty) {
+      var query2 = `UPDATE products set stock_quantity = ${stockQty - itemQty} where item_id = ${itemId}`;
+      connection.query(query2, function(err, res) {
+        console.log(`order successful, your total is $${itemQty*price}`)
         displayAll()
-      }
-    })
+      })
+    } else {
+      console.log("order failed, insufficient quantity")
+      displayAll()
+    }
   })
 }
 
@@ -71,10 +77,13 @@ function displayAll() {
 
   connection.query(query, function(err, res) {
     console.log("Inventory:")
+    var availableIds =[]
+
     for (var x=0; x<=res.length -1; x++){
-      console.log(`Item ID ${res[x].item_id}: ${res[x].stock_quantity} ${res[x].product_name}s @ $${res[x].price}`)
+      console.log(`${res[x].item_id}: ${res[x].stock_quantity} ${res[x].product_name}s @ $${res[x].price}`)
+      availableIds.push(res[x].item_id)
     }
-    getOrder()
+    getOrder(availableIds)
   });
 }
 
