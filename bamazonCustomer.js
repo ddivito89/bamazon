@@ -25,7 +25,7 @@ function getOrder(availableIds) {
       name: "itemId",
       message: "id of item?",
       validate: function(value) {
-        if (isNaN(value) === false && value.indexOf(".") === -1 && availableIds.indexOf(parseInt(value)) > -1 ) {
+        if (isNaN(value) === false && value.indexOf(".") === -1 && availableIds.indexOf(parseInt(value)) > -1) {
           return true;
         }
         return false;
@@ -49,8 +49,7 @@ function getOrder(availableIds) {
   })
 }
 
-
-function processTransaction(itemId, itemQty){
+function processTransaction(itemId, itemQty) {
   var query = `SELECT stock_quantity, price, product_name FROM products where item_id = ${itemId}`;
 
   connection.query(query, function(err, res) {
@@ -62,7 +61,7 @@ function processTransaction(itemId, itemQty){
     if (stockQty >= itemQty) {
       var query2 = `UPDATE products set stock_quantity = ${stockQty - itemQty} where item_id = ${itemId}`;
       connection.query(query2, function(err, res) {
-        console.log(`order successful, your total is $${itemQty*price}`)
+        console.log(`order successful, your total is $${itemQty * price}`)
         displayAll()
       })
     } else {
@@ -77,9 +76,9 @@ function displayAll() {
 
   connection.query(query, function(err, res) {
     console.log("Inventory:")
-    var availableIds =[]
+    var availableIds = []
 
-    for (var x=0; x<=res.length -1; x++){
+    for (var x = 0; x <= res.length - 1; x++) {
       console.log(`${res[x].item_id}: ${res[x].stock_quantity} ${res[x].product_name}s @ $${res[x].price}`)
       availableIds.push(res[x].item_id)
     }

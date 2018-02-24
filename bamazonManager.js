@@ -18,13 +18,13 @@ connection.connect(function(err) {
   }
 );
 
-function manage(){
+function manage() {
   inquirer.prompt([
     {
       type: 'list',
-      name:'choice',
+      name: 'choice',
       message: 'What do you want to do?',
-      choices: ['View Products for Sale','View Low Inventory','Add to Inventory', 'Add New Product']
+      choices: ['View Products for Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product']
     }
   ]).then(function(answers) {
     var choice = answers.choice
@@ -34,7 +34,7 @@ function manage(){
         viewProducts()
         break;
       case 'View Low Inventory':
-        viewInventory()
+        viewLowInventory()
         break;
       case 'Add to Inventory':
         addInventory()
@@ -47,36 +47,39 @@ function manage(){
   })
 }
 
-function viewProducts(){
-
-  manage()
-}
-function viewInventory(){
-
-  manage()
-}
-function addInventory(){
-
-  manage()
-}
-function addProduct(){
-
-  manage()
-}
-
-function displayAll() {
+function viewProducts() {
   var query = "SELECT * FROM products";
 
   connection.query(query, function(err, res) {
     console.log("Inventory:")
-    var availableIds =[]
 
-    for (var x=0; x<=res.length -1; x++){
+    for (var x = 0; x <= res.length - 1; x++) {
       console.log(`${res[x].item_id}: ${res[x].stock_quantity} ${res[x].product_name}s @ $${res[x].price}`)
-      availableIds.push(res[x].item_id)
     }
-    getOrder(availableIds)
+    manage()
   });
+}
+
+function viewLowInventory() {
+  var query = "SELECT * FROM products where stock_quantity < 5 ";
+
+  connection.query(query, function(err, res) {
+    console.log("Low Inventory:")
+    for (var x = 0; x <= res.length - 1; x++) {
+      console.log(`${res[x].item_id}: ${res[x].stock_quantity} ${res[x].product_name}s @ $${res[x].price}`)
+    }
+    manage()
+  });
+}
+
+function addInventory() {
+  manage()
+  
+}
+
+function addProduct() {
+
+  manage()
 }
 
 manage()
